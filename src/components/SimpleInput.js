@@ -1,43 +1,51 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 const SimpleInput = (props) => {
-  // true cuz it wouldn't show warning on page load
-  const [nameIsValid, setNameIsValid] = useState(false);
-  const [nameIsTouched, setNameIsTouched] = useState(false);
-  const nameRef = useRef();
+  const [username, setUsername] = useState("");
+  const [nameWasTouched, setNameWasTouched] = useState(false);
+
+  const usernameIsValid = username.trim() !== "";
+  const inputIsInvalid = !usernameIsValid && nameWasTouched;
+
+  const nameChangeHandler = (event) => {
+    setUsername(event.target.value);
+  };
+
+  const blurHandler = (event) => {
+    setNameWasTouched(true);
+  };
 
   const submitHandler = (event) => {
     event.preventDefault();
 
-    setNameIsTouched(true);
+    setNameWasTouched(true);
 
-    const username = nameRef.current.value;
-    if (username.trim() === "") {
-      setNameIsValid(false);
-
+    if (!usernameIsValid) {
       return;
     }
-    setNameIsValid(true);
+
     console.log(username);
-    console.log("Form Submitted!");
+
+    // nameInputRef.current.value = ''; => NOT IDEAL, DON'T MANIPULATE THE DOM
+    setUsername("");
+    setNameWasTouched(false);
   };
 
-  const nameInputIsValid = !nameIsValid && nameIsTouched;
+  const inputClasses = inputIsInvalid ? "form-control invalid" : "form-control";
 
-  // dynamic CSS for invalid case
-  const nameInputClass = nameInputIsValid
-    ? "form-control invalid"
-    : "form-control";
-
-  // If a form is submitted and it has a button in it, a HTTP req is automatically sent to the server
-  // It is a browser default behaviour, hence we use preventDefault()
   return (
     <form onSubmit={submitHandler}>
-      <div className={nameInputClass}>
+      <div className={inputClasses}>
         <label htmlFor="name">Your Name</label>
-        <input type="text" id="name" ref={nameRef} />
-        {nameInputIsValid && (
-          <p className="error-text">Please enter your name</p>
+        <input
+          type="text"
+          id="name"
+          onChange={nameChangeHandler}
+          onBlur={blurHandler}
+          value={username}
+        />
+        {inputIsInvalid && (
+          <p className="error-text">Name must not be empty.</p>
         )}
       </div>
       <div className="form-actions">
